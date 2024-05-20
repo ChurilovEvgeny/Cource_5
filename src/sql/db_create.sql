@@ -1,0 +1,1 @@
+SELECT 'CREATE DATABASE hh_vac' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'hh_vac')
