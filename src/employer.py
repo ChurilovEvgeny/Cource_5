@@ -19,7 +19,7 @@ class Employer(BaseModel):
                 f"URL: {self.alternate_url}\n")
 
     def to_tuple(self):
-        return (self.id, self.name, str(self.alternate_url))
+        return self.id, self.name, str(self.alternate_url)
 
 
 class EmployersList(RootModel):

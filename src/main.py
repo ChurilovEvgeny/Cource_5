@@ -16,8 +16,6 @@ def main():
     hhv.load_vacancies([5865644, 679023, 3007832])
     print(hhv.vacancies)
 
-    return
-
     db = DBManager()
     db.create_db()
     with db.connect(db.load_config()) as conn:
@@ -30,6 +28,15 @@ def main():
             ls = hhe.employers.to_list()
             for emp_info in ls:
                 cur.execute(db.get_command_sql_insert_into_employers(), emp_info)
+
+        with conn.cursor() as cur:
+            ls = hhv.vacancies.to_list()
+            for vac_info in ls:
+
+                # t = (1, 2, 'Ин', 'h', 'С')
+                # cur.execute(db.get_command_db_insert_into_vacancies(), t)
+                cur.execute(db.get_command_db_insert_into_vacancies(), vac_info[0])
+                cur.execute(db.get_command_db_insert_into_salaries(), vac_info[1])
 
     conn.close()
 

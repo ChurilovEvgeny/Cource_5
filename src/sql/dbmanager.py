@@ -53,6 +53,12 @@ class DBManager:
     def get_command_sql_insert_into_employers(self) -> str:
         return self.get_sql_cmd("db_insert_into_employers.sql")
 
+    def get_command_db_insert_into_vacancies(self) -> str:
+        return self.get_sql_cmd("db_insert_into_vacancies.sql")
+
+    def get_command_db_insert_into_salaries(self) -> str:
+        return self.get_sql_cmd("db_insert_into_salaries.sql")
+
     def get_sql_cmd(self, filename: str) -> str:
         script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
         abs_file_path = os.path.join(script_dir, filename)

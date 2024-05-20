@@ -1,5 +1,5 @@
 INSERT INTO vacancies
-VALUES(%, %, %, %, %)
+VALUES(%s, %s, %s, %s, %s)
 ON CONFLICT(id) DO UPDATE
 SET
 employer_id = EXCLUDED.employer_id,

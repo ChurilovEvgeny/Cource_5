@@ -1,5 +1,5 @@
 INSERT INTO salaries
-VALUES(%, %, %, %, %)
+VALUES(%s, %s, %s, %s, %s)
 ON CONFLICT(vacancy_id) DO UPDATE
 SET
 sal_from = EXCLUDED.sal_from,

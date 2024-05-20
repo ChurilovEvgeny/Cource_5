@@ -1,6 +1,8 @@
-from typing import Self
+from pydantic import BaseModel, RootModel, AnyHttpUrl, PositiveInt, validator
 
-from pydantic import BaseModel, RootModel, AnyHttpUrl, PositiveInt
+
+class Schema:
+    pass
 
 
 class Vacancy(BaseModel):
@@ -14,16 +16,42 @@ class Vacancy(BaseModel):
     - area: dict | None = {}
     """
     id: PositiveInt
-    employer: dict = {}
+    employer: int
     name: str
     alternate_url: AnyHttpUrl
     salary: dict | None = {}
-    area: dict | None = {}
+    area: str | None
+
+    @validator('area', always=True, pre=True)
+    def validate_area(cls, v):
+        if v is None:
+            return None
+        elif not isinstance(v, dict):
+            raise TypeError('"area" type must be dict')
+        if 'name' not in v:
+            return "НЕ УКАЗАНО"
+        return v['name']
+
+    @validator('salary', always=True, pre=True)
+    def validate_salary(cls, v):
+        if v is None:
+            return {'from': None, 'to': None, 'currency': "", 'gross': False}
+        elif not isinstance(v, dict):
+            raise TypeError('"salary" type must be dict')
+        return v
+
+    @validator('employer', always=True, pre=True)
+    def validate_employer(cls, v):
+        if not isinstance(v, dict):
+            raise TypeError('"employer" type must be dict')
+        if 'id' not in v:
+            raise TypeError('"employer" must be have id')
+        return v['id']
 
     def __str__(self):
         return (f"{30 * '*'}\n"
                 f"id: {self.id}\n"
-                f"id Работодателя: {self.employer["id"]}\n"
+                f"id Работодателя: {self.employer}\n"
                 f"Вакансия: {self.name}\n"
                 f"URL: {self.alternate_url}\n"
                 f"Зарплата: {self.__salary_str()}\n"
@@ -35,19 +63,18 @@ class Vacancy(BaseModel):
         else:
             from_str = f"от {self.salary['from']} {self.salary['currency']} " if self.salary['from'] else ""
             to_str = f"до {self.salary['to']} {self.salary['currency']} " if self.salary['to'] else ""
-            gross = "до вычета налогов" if self.salary['to'] else "на руки"
+            gross = "до вычета налогов" if self.salary['gross'] else "на руки"
             return (from_str + to_str + gross).strip().capitalize()
 
     def __area_str(self):
         if not self.area:
             return "Не указан"
         else:
-            return self.area['name']
+            return self.area
 
-    @staticmethod
-    def __vacancy_type_validate(instance):
-        if not isinstance(instance, Vacancy):
-            raise TypeError("Сравнивать можно только с типом Vacancy")
+    def to_tuple(self):
+        return ((self.id, self.employer, self.name, str(self.alternate_url), self.area),
+                (self.id, self.salary['from'], self.salary['to'], self.salary['currency'], self.salary['gross']))
 
 
 class VacanciesList(RootModel):
@@ -65,36 +92,8 @@ class VacanciesList(RootModel):
         """
         self.root.append(vacancy)
 
-    def remove_vacancies_by_ids(self, vacancies_id: list[int]):
-        """
-        Удаляет вакансии с заданными id
-        :param vacancies_id: список id
-        :return: None
-        """
-        new_root = [vac for vac in self.root if vac.id not in vacancies_id]
-        if new_root:
-            self.root = new_root
-
-    def filter_vacancies_by_ids(self, vacancies_id: list[int] | None = None):
-        """
-        Фильтрует (оставляет) вакансии с заданными id
-        :param vacancies_id: список id
-        :return: None
-        """
-        if vacancies_id:
-            new_root = [vac for vac in self.root if vac.id in vacancies_id]
-            if new_root:
-                self.root = new_root
-
-    def filter_vacancies_by_keyword(self, keywords: list[str]):
-        """
-        Фильтрует (оставляет) вакансии по заданными ключевым словам
-        :param keywords: список ключевых слов
-        :return: None
-        """
-        new_root = [vac for vac in self.root if any([key.lower() in vac.name.lower() for key in keywords])]
-        if new_root:
-            self.root = new_root
+    def to_list(self):
+        return [v.to_tuple() for v in self.root]
 
     def __str__(self):
         return "Нет данных!" if not self.root else "\n".join(map(str, self.root))
