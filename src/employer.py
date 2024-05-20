@@ -18,6 +18,9 @@ class Employer(BaseModel):
                 f"Работодатель: {self.name}\n"
                 f"URL: {self.alternate_url}\n")
 
+    def to_tuple(self):
+        return (self.id, self.name, str(self.alternate_url))
+
 
 class EmployersList(RootModel):
     """
@@ -33,3 +36,9 @@ class EmployersList(RootModel):
         :return: None
         """
         self.root.append(employer)
+
+    def to_list(self):
+        return [e.to_tuple() for e in self.root]
+
+    def __str__(self):
+        return "Нет данных!" if not self.root else "\n".join(map(str, self.root))

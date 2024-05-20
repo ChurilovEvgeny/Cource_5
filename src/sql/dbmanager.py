@@ -1,3 +1,4 @@
+import os
 from configparser import ConfigParser
 
 import psycopg2
@@ -7,19 +8,17 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 class DBManager:
 
     def __init__(self):
-        self.create_db()
-        conn = self.connect(self.load_config())
-
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(self.get_command_sql_init())
+        pass
 
     def load_config_without_db(self, filename='database.ini', section='postgresql_empty') -> dict:
         return self.load_config(filename, section)
 
     def load_config(self, filename='database.ini', section='postgresql') -> dict:
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        abs_file_path = os.path.join(script_dir, filename)
+
         parser = ConfigParser()
-        parser.read(filename)
+        parser.read(abs_file_path)
 
         # get section, default to postgresql
         config = {}
@@ -28,7 +27,7 @@ class DBManager:
             for param in params:
                 config[param[0]] = param[1]
         else:
-            raise Exception('Section {0} not found in the {1} file'.format(section, filename))
+            raise Exception('Section {0} not found in the {1} file'.format(section, abs_file_path))
 
         return config
 
@@ -48,8 +47,16 @@ class DBManager:
     def get_command_sql_init(self) -> str:
         return self.get_sql_cmd("db_create_tables.sql")
 
-    def get_sql_cmd(self, filepath: str) -> str:
-        return open(filepath, "r", encoding="utf-8").read()
+    def get_command_sql_is_tables_exists(self) -> str:
+        return self.get_sql_cmd("db_is_tables_exists.sql")
+
+    def get_command_sql_insert_into_employers(self) -> str:
+        return self.get_sql_cmd("db_insert_into_employers.sql")
+
+    def get_sql_cmd(self, filename: str) -> str:
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        abs_file_path = os.path.join(script_dir, filename)
+        return open(abs_file_path, "r", encoding="utf-8").read()
 
     def create_db(self) -> bool:
         # Из-за особенностей обратки команды CREATE DATABASE

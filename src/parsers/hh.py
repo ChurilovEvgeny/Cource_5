@@ -2,11 +2,10 @@ from http import HTTPStatus
 
 import requests
 
-from src.parsers.parser import Parser
 from src.vacancy import VacanciesList, Vacancy
 
 
-class HH(Parser):
+class HH:
     """
     Класс для работы с API HeadHunter
     """
@@ -17,43 +16,36 @@ class HH(Parser):
         self.__params = {'text': '', 'page': 0, 'per_page': 100}
         self.__vacancies = VacanciesList()
 
-    def load_vacancies(self, keywords: list[str], salary: int, number_of_vacation: int):
+    def load_vacancies(self, employers_id: list[int]):
         """
         Загрузить вакансии с hh.ru
-        :param keywords: список ключевых слов
-        :param salary: зарплата (0, если неважно)
-        :param number_of_vacation: количество получаемых вакансий
+        :param employers_id: список идентификаторов работодателей
         :return: None
         """
-        self.__params['text'] = " ".join(keywords)
-        while number_of_vacation:
-            # На одной странице не может быть больше 100 вакансий согласно API
-            if number_of_vacation <= 100:
-                per_page = number_of_vacation
-                number_of_vacation = 0
-            else:
-                per_page = 100
-                number_of_vacation -= 100
-            self.__params['per_page'] = per_page
-            self.__params['currency'] = "RUR"  # так же сразу указываем перевод в рубли
 
-            # Если указываем зарплату, то дополнительно указываем на вывод вакансий ТОЛЬКО с зарплатами
-            if salary:
-                self.__params['salary'] = salary
-                self.__params['only_with_salary'] = True
+        for emp_id in employers_id:
+            self.__params['employer_id'] = str(emp_id)
+            self.__params['page'] = 0
+            self.__params['per_page'] = 100
+            while True:
+                response = requests.get(self.__url, headers=self.__headers, params=self.__params)
+                if response.status_code != HTTPStatus.OK:
+                    break
 
-            response = requests.get(self.__url, headers=self.__headers, params=self.__params)
-            if response.status_code != HTTPStatus.OK:
-                break
+                resp_json = response.json()
+                if 'items' not in resp_json:
+                    break
 
-            resp_json = response.json()
-            if 'items' not in resp_json:
-                break
+                vac_json = response.json()['items']
+                [self.__vacancies.append(Vacancy(**vac)) for vac in vac_json]
 
-            vac_json = response.json()['items']
-            [self.__vacancies.append(Vacancy(**vac)) for vac in vac_json]
+                cur_page = int(response.json()['page'])
+                count_pages = int(response.json()['pages'])
 
-            self.__params['page'] += 1
+                if cur_page < count_pages - 1:
+                    self.__params['page'] += 1
+                else:
+                    break
 
     @property
     def vacancies(self) -> VacanciesList:

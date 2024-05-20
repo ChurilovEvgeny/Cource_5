@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS vacancies
 	name VARCHAR(255) NOT NULL,
 	alternate_url VARCHAR(255) NOT NULL,
 	area_name VARCHAR(255) NOT NULL,
-	schedule VARCHAR(50) NOT NULL DEFAULT('Не указано'),
 
 	FOREIGN KEY (employer_id) REFERENCES employers(id)
 );
