@@ -1,14 +1,35 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, PositiveInt, AnyHttpUrl, RootModel
 
 
 class Employer(BaseModel):
     """
-    "alternate_url": "https://hh.ru/employer/1455",
-"id": "1455",
-"logo_urls": {},
-"name": "HeadHunter",
-"open_vacancies": 19,
-"url": "https://api.hh.ru/employers/1455",
-"vacancies_url": "https://api.hh.ru/vacancies?employer_id=1455"
+    Класс контейнер Работодателя. Требуемые ИМЕНОВАННЫЕ параметры:\n
+    - id: PositiveInt
+    - name: str
+    - alternate_url: AnyHttpUrl
     """
-    pass
+    id: PositiveInt
+    name: str
+    alternate_url: AnyHttpUrl
+
+    def __str__(self):
+        return (f"{30 * '*'}\n"
+                f"id: {self.id}\n"
+                f"Работодатель: {self.name}\n"
+                f"URL: {self.alternate_url}\n")
+
+
+class EmployersList(RootModel):
+    """
+    Класс контейнер списка работодателей. Требуемые параметры:\n
+    - list[Vacancy] = None
+    """
+    root: list[Employer] = []
+
+    def append(self, employer: Employer):
+        """
+        Добавляет объект типа Employer, описывающий работодателя в списке работодателей
+        :param employer: Работодатель
+        :return: None
+        """
+        self.root.append(employer)
