@@ -1,10 +1,6 @@
 from pydantic import BaseModel, RootModel, AnyHttpUrl, PositiveInt, validator
 
 
-class Schema:
-    pass
-
-
 class Vacancy(BaseModel):
     """
     Класс контейнер Вакансии. Требуемые ИМЕНОВАННЫЕ параметры:\n

@@ -3,25 +3,25 @@
 # 3007832 ООО Газпром СПГ технологии
 
 from src.parsers.hh_employers import HHEmployers
-from src.parsers.hh import HH
+from src.parsers.hh_vacancies import HHVacancies
 from src.sql.dbmanager import DBManager
 
 EMPLOYERS_IDS = (5865644, 679023, 3007832, 1742190, 9473760, 9030164, 990888, 2519536, 10859723, 67611)
 
-def main():
 
+def main():
     hhe = HHEmployers()
     hhe.load_employer_info(EMPLOYERS_IDS)
     print(hhe.employers)
 
-    hhv = HH()
+    hhv = HHVacancies()
     hhv.load_vacancies(EMPLOYERS_IDS)
     print(hhv.vacancies)
 
     db = DBManager()
     db.create_db()
 
-    db.connect(db.load_config())
+    db.connect()
     db.init_tables()
     db.insert_employers(hhe.employers.to_list())
     db.insert_vacancies_and_salaries(hhv.vacancies.to_list())

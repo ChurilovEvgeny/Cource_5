@@ -5,7 +5,7 @@ import requests
 from src.vacancy import VacanciesList, Vacancy
 
 
-class HH:
+class HHVacancies:
     """
     Класс для работы с API HeadHunter
     """
