@@ -203,7 +203,7 @@ class DBManager:
         return self.__get_sql_cmd("db_create_pattern_table.sql")
 
     def __get_command_db_insert_into_pattern_table(self) -> str:
-        return self.__get_sql_cmd("db_insert_into_pattern_table..sql")
+        return self.__get_sql_cmd("db_insert_into_pattern_table.sql")
 
     def __get_sql_cmd(self, filename: str) -> str:
         script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
