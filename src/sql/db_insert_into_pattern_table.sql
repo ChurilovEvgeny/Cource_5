@@ -1,0 +1,1 @@
+INSERT INTO tmp_pattern VALUES(%s);

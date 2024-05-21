@@ -6,39 +6,31 @@ from src.parsers.hh_employers import HHEmployers
 from src.parsers.hh import HH
 from src.sql.dbmanager import DBManager
 
+EMPLOYERS_IDS = (5865644, 679023, 3007832, 1742190, 9473760, 9030164, 990888, 2519536, 10859723, 67611)
 
 def main():
+
     hhe = HHEmployers()
-    hhe.load_employer_info([5865644, 679023, 3007832])
+    hhe.load_employer_info(EMPLOYERS_IDS)
     print(hhe.employers)
 
     hhv = HH()
-    hhv.load_vacancies([5865644, 679023, 3007832])
+    hhv.load_vacancies(EMPLOYERS_IDS)
     print(hhv.vacancies)
 
     db = DBManager()
     db.create_db()
-    with db.connect(db.load_config()) as conn:
-        with conn.cursor() as cur:
-            cur.execute(db.get_command_sql_is_tables_exists())
-            if not int(cur.fetchone()[0]):
-                cur.execute(db.get_command_sql_init())
 
-        with conn.cursor() as cur:
-            ls = hhe.employers.to_list()
-            for emp_info in ls:
-                cur.execute(db.get_command_sql_insert_into_employers(), emp_info)
+    db.connect(db.load_config())
+    db.init_tables()
+    db.insert_employers(hhe.employers.to_list())
+    db.insert_vacancies_and_salaries(hhv.vacancies.to_list())
 
-        with conn.cursor() as cur:
-            ls = hhv.vacancies.to_list()
-            for vac_info in ls:
-
-                # t = (1, 2, 'Ин', 'h', 'С')
-                # cur.execute(db.get_command_db_insert_into_vacancies(), t)
-                cur.execute(db.get_command_db_insert_into_vacancies(), vac_info[0])
-                cur.execute(db.get_command_db_insert_into_salaries(), vac_info[1])
-
-    conn.close()
+    print(db.get_companies_and_vacancies_count())
+    print(db.get_all_vacancies())
+    print(db.get_avg_salary())
+    print(db.get_vacancies_with_higher_salary())
+    print(db.get_vacancies_with_keyword(("главный", "ведущий")))
 
 
 if __name__ == "__main__":

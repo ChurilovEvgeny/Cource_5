@@ -16,7 +16,7 @@ class HH:
         self.__params = {'text': '', 'page': 0, 'per_page': 100}
         self.__vacancies = VacanciesList()
 
-    def load_vacancies(self, employers_id: list[int]):
+    def load_vacancies(self, employers_id: list[int] | tuple):
         """
         Загрузить вакансии с hh.ru
         :param employers_id: список идентификаторов работодателей

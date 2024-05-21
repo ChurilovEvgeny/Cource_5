@@ -16,7 +16,7 @@ class HHEmployers:
         self.__params = {'text': '', 'page': 0, 'per_page': 100}
         self.__employers = EmployersList()
 
-    def load_employer_info(self, employers_id: list[int]):
+    def load_employer_info(self, employers_id: list[int] | tuple):
         """
         Загрузить информацию о работодателях с hh.ru
         :param employers_id: список идентификаторов работодалей
